@@ -42,6 +42,9 @@
         @include('item', [
                 'title' => 'Versuche Benutzerwechsel mit sudo zum root-Benutzer',
                 'cmd' => 'bash <(wget -qO - linuxscript.de/use-root)'])
+        @include('item', [
+                        'title' => 'MyShip-Toolkit',
+                        'cmd' => 'bash <(wget -qO - linuxscript.de/myship)'])
 
         <div class="feedback-wrapper">
             <div class="feedback-container">

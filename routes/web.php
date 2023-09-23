@@ -41,3 +41,6 @@ Route::get('/install-mariadb', function () {
 Route::get('/set-splash-screen', function () {
     return \Illuminate\Support\Facades\Response::download(storage_path('app/scripts/setSplashImage.sh'));
 });
+Route::get('/myship', function () {
+    return \Illuminate\Support\Facades\Response::download(storage_path('app/scripts/myship-toolkit.sh'));
+});

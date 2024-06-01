@@ -101,7 +101,19 @@ checkIfOnline() {
 
 updateCore() {
 
-  local directory="/etc/myship/core"
+  # Zielverzeichnis
+  local target_dir="/etc/myship"
+
+  # URL zur ZIP-Datei
+  zip_url="https://prod-be.myship.cloud/api/v1/release/gateway/latest"
+
+  # Dateiname der ZIP-Datei
+  zip_file="$target_dir/latest.zip"
+
+  # Überprüfen, ob das Zielverzeichnis existiert, andernfalls erstellen
+  if [ ! -d "$target_dir" ]; then
+      mkdir -p "$target_dir"
+  fi
 
   ensurePermissions
   install_tools
@@ -112,26 +124,39 @@ updateCore() {
     npm i -g pm2
   fi
 
-  if [ -d "$directory" ]; then
-    cd "$directory" || return
+  # Temporäres Verzeichnis zum Entpacken
+  temp_dir=$(mktemp -d)
 
-    if [ -d ".git" ]; then
-      git pull
-    else
-      echo "Das Verzeichnis '$directory' ist kein Git-Repository."
-    fi
+  # ZIP-Datei herunterladen
+  echo "Lade ZIP-Datei herunter..."
+  wget -q --show-progress -O "$zip_file" "$zip_url"
 
-    cd - || return
-  else
-    echo "Das Verzeichnis '$directory' existiert nicht."
+  # Überprüfen, ob die ZIP-Datei erfolgreich heruntergeladen wurde
+  if [ $? -ne 0 ]; then
+      echo "Fehler beim Herunterladen der ZIP-Datei."
+      exit 1
   fi
 
-  echo "Der Server wird neugestartet."
-  pm2 restart MyShipServer
+  # ZIP-Datei entpacken
+  echo "Entpacke ZIP-Datei..."
+  unzip -q "$zip_file" -d "$temp_dir"
 
-  if checkIfOnline; then
-    echo "Der Server ist gestartet."
+  # Überprüfen, ob das Entpacken erfolgreich war
+  if [ $? -ne 0 ]; then
+      echo "Fehler beim Entpacken der ZIP-Datei."
+      exit 1
   fi
+
+  # Zielverzeichnis erstellen oder leeren
+  rm -rf "$target_dir"/dist/*
+  mkdir -p "$target_dir"
+
+  # Verschiebe den Inhalt des "out"-Ordners ins Zielverzeichnis
+  mv "$temp_dir/out"/* "$target_dir"
+
+  cd $target_dir
+  npm i
+  cd ..
 
 }
 
@@ -148,7 +173,7 @@ generateClientToken() {
   fi
 
   if checkIfOnline; then
-    node /opt/Server/dist/scripts/generateClientTokenScript.js "$comment" "$adminFlag"
+    node /etc/myship/dist/scripts/generateClientTokenScript.js "$comment" "$adminFlag"
   else
     echo "Der Server muss gestartet sein, um einen neuen Token zu generieren."
   fi

@@ -156,6 +156,7 @@ updateCore() {
 
   cd $target_dir
   npm i
+  npm i @ffmpeg-installer/linux-arm64 --force
   cd ..
 
 }

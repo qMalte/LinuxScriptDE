@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # MyShip - Toolkit
 
 update_dep() {

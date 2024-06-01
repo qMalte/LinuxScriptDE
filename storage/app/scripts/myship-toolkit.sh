@@ -101,7 +101,7 @@ checkIfOnline() {
 
 updateCore() {
 
-  local directory="/opt/Server"
+  local directory="/etc/myship/core"
 
   ensurePermissions
   install_tools
